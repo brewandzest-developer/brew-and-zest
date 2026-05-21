@@ -1,10 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
 import Link from "next/link";
+import { motion } from "framer-motion";
+
+import { useCartStore } from "@/store/cart-store";
 
 interface ProductCardProps {
+    id: number;
     slug: string;
     name: string;
     subtitle: string;
@@ -13,13 +16,19 @@ interface ProductCardProps {
   }
 
   export default function ProductCard({
+    id,
     slug,
     name,
     subtitle,
     price,
     image,
   }: ProductCardProps) {
-  return (
+  
+    const addToCart = useCartStore(
+      (state) => state.addToCart
+    );
+  
+    return (
     <Link href={`/products/${slug}`}>
   <motion.div
     whileHover={{ y: -10 }}
@@ -58,9 +67,22 @@ interface ProductCardProps {
           ₹{price}
         </span>
 
-        <button className="rounded-full bg-[#161414] px-5 py-2 text-sm text-white transition hover:scale-105">
-          Add
-        </button>
+        <button
+  onClick={(e) => {
+    e.preventDefault();
+
+    addToCart({
+      id,
+      name,
+      price,
+      image,
+      quantity: 1,
+    });
+  }}
+  className="rounded-full bg-[#161414] px-5 py-2 text-sm text-white transition hover:scale-105"
+>
+  Add
+</button>
       </div>
     </div>
   </motion.div>

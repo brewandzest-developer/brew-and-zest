@@ -1,7 +1,24 @@
+"use client";
+
 import Container from "./container";
 import MobileMenu from "./mobile-menu";
 
+import { useCartStore } from "@/store/cart-store";
+import { useUIStore } from "@/store/ui-store";
+
 export default function Header() {
+    const cart = useCartStore(
+        (state) => state.cart
+      );
+      
+      const openCart = useUIStore(
+        (state) => state.openCart
+      );
+      
+      const totalItems = cart.reduce(
+        (acc, item) => acc + item.quantity,
+        0
+      );
   return (
     <header className="sticky top-0 z-50 border-b border-[#E6D7C8] bg-[#FEF4E4]/80 backdrop-blur-md">
       <Container>
@@ -45,16 +62,26 @@ export default function Header() {
 
           {/* Actions */}
           <div className="flex items-center gap-4">
-            <button className="hidden md:block">
-              Search
-            </button>
 
-            <button>
-              Cart
-            </button>
+  <button className="hidden md:block">
+    Search
+  </button>
 
-            <MobileMenu />
-          </div>
+  <button
+    onClick={openCart}
+    className="relative"
+  >
+    Cart
+
+    {totalItems > 0 && (
+      <span className="absolute -right-3 -top-3 flex h-5 w-5 items-center justify-center rounded-full bg-[#161414] text-xs text-white">
+        {totalItems}
+      </span>
+    )}
+  </button>
+
+  <MobileMenu />
+</div>
         </div>
       </Container>
     </header>
