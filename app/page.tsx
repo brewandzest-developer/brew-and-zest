@@ -1,9 +1,18 @@
+import Header from "@/components/layout/header";
+import HeroSection from "@/components/home/hero-section";
+import FeatureStrip from "@/components/home/feature-strip";
+import ProductShowcase from "@/components/home/product-showcase";
+
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[#FEF4E4] flex items-center justify-center">
-      <h1 className="text-5xl font-bold text-[#161414]">
-        Brew & Zest
-      </h1>
-    </main>
+    <>
+      <Header />
+
+      <HeroSection />
+
+      <FeatureStrip />
+
+      <ProductShowcase />
+    </>
   );
 }
