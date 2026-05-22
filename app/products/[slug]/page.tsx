@@ -38,7 +38,7 @@ export default function ProductPage() {
           <div className="grid gap-16 lg:grid-cols-2">
 
             {/* Image */}
-            <div className="relative aspect-square overflow-hidden rounded-[40px] bg-gradient-to-br from-[#7B4E4C] to-[#161414] p-10">
+            <div className="relative aspect-square overflow-hidden rounded-[40px] bg-linear-to-br from-[#7B4E4C] to-[#161414] p-10">
               <Image
                 src={product.image}
                 alt={product.name}

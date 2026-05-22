@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 
 import { Poppins } from "next/font/google";
@@ -26,7 +27,7 @@ export default function RootLayout({
       <body className={`${poppins.variable} antialiased`}>
 
 <CartDrawer />
-
+<Script src="https://checkout.razorpay.com/v1/checkout.js" />
 {children}
 
 </body>

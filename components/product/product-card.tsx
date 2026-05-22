@@ -33,11 +33,11 @@ interface ProductCardProps {
   <motion.div
     whileHover={{ y: -10 }}
     transition={{ duration: 0.3 }}
-    className="group overflow-hidden rounded-[32px] border border-[#E6D7C8] bg-white/40 backdrop-blur-md"
+    className="group overflow-hidden rounded-4xl border border-[#E6D7C8] bg-white/40 backdrop-blur-md"
   >
     
     {/* Product Image */}
-    <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-[#7B4E4C] to-[#161414] p-8">
+    <div className="relative aspect-square overflow-hidden bg-linear-to-br from-[#7B4E4C] to-[#161414] p-10">
       
       <Image
         src={image}

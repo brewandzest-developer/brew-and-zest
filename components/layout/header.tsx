@@ -3,7 +3,7 @@
 import Container from "./container";
 import MobileMenu from "./mobile-menu";
 
-import { useCartStore } from "@/store/cart-store";
+import { useCartStore } from "../../store/cart-store";
 import { useUIStore } from "@/store/ui-store";
 
 export default function Header() {
@@ -57,6 +57,9 @@ export default function Header() {
               className="text-sm transition hover:text-[#7B4E4C]"
             >
               Contact
+            </a>
+            <a href="/shop">
+                Shop
             </a>
           </nav>
 
