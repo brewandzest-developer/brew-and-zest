@@ -1,92 +1,77 @@
 "use client";
 
-import Container from "./container";
-import MobileMenu from "./mobile-menu";
+import Link from "next/link";
 
-import { useCartStore } from "../../store/cart-store";
-import { useUIStore } from "@/store/ui-store";
+const navLinks = [
+  {
+    label: "Home",
+    href: "/",
+  },
+  {
+    label: "Shop",
+    href: "/shop",
+  },
+  {
+    label: "About",
+    href: "/about",
+  },
+  {
+    label: "Contact",
+    href: "/contact",
+  },
+];
 
 export default function Header() {
-    const cart = useCartStore(
-        (state) => state.cart
-      );
-      
-      const openCart = useUIStore(
-        (state) => state.openCart
-      );
-      
-      const totalItems = cart.reduce(
-        (acc, item) => acc + item.quantity,
-        0
-      );
   return (
-    <header className="sticky top-0 z-50 border-b border-[#E6D7C8] bg-[#FEF4E4]/80 backdrop-blur-md">
-      <Container>
-        <div className="flex h-20 items-center justify-between">
-          
-          {/* Logo */}
-          <h1 className="text-3xl font-bold tracking-tight">
-            Brew & Zest
-          </h1>
+    <header className="border-b border-black/10 bg-[#F5EBDD]">
 
-          {/* Desktop Nav */}
-          <nav className="hidden items-center gap-8 md:flex">
-            <a
-              href="#"
-              className="text-sm transition hover:text-[#7B4E4C]"
-            >
-              Home
-            </a>
+      <div className="mx-auto flex max-w-360 items-center justify-between px-10 py-8">
 
-            <a
-              href="#"
-              className="text-sm transition hover:text-[#7B4E4C]"
-            >
-              Shop
-            </a>
+        {/* Logo */}
+        <Link
+          href="/"
+          className="text-5xl font-bold tracking-tight"
+        >
+          Brew & Zest
+        </Link>
 
-            <a
-              href="#"
-              className="text-sm transition hover:text-[#7B4E4C]"
-            >
-              About
-            </a>
+        {/* Navigation */}
+        <nav className="flex items-center gap-10 text-lg">
 
-            <a
-              href="#"
-              className="text-sm transition hover:text-[#7B4E4C]"
-            >
-              Contact
-            </a>
-            <a href="/shop">
-                Shop
-            </a>
-          </nav>
+          {navLinks.map(
+            (
+              link: {
+                label: string;
+                href: string;
+              }
+            ) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="transition hover:opacity-60"
+              >
+                {link.label}
+              </Link>
+            )
+          )}
 
-          {/* Actions */}
-          <div className="flex items-center gap-4">
+        </nav>
 
-  <button className="hidden md:block">
-    Search
-  </button>
+        {/* Right Side */}
+        <div className="flex items-center gap-8 text-lg">
 
-  <button
-    onClick={openCart}
-    className="relative"
-  >
-    Cart
+          <button className="transition hover:opacity-60">
+            Search
+          </button>
 
-    {totalItems > 0 && (
-      <span className="absolute -right-3 -top-3 flex h-5 w-5 items-center justify-center rounded-full bg-[#161414] text-xs text-white">
-        {totalItems}
-      </span>
-    )}
-  </button>
+          <button className="transition hover:opacity-60">
+            Cart
+          </button>
 
-  <MobileMenu />
-</div>
         </div>
-      </Container>
+
+      </div>
+
     </header>
   );
 }

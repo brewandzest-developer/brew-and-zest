@@ -2,12 +2,10 @@
 
 import Image from "next/image";
 import { notFound, useParams } from "next/navigation";
-
-import Header from "@/components/layout/header";
 import Container from "@/components/layout/container";
 import Button from "@/components/ui/button";
 
-import { products } from "@/constants/products";
+import { products } from "@/data/products";
 
 import { useCartStore } from "@/store/cart-store";
 
@@ -15,14 +13,10 @@ export default function ProductPage() {
 
   const params = useParams();
 
-  const slug = params.slug as string;
-
-  const addToCart = useCartStore(
-    (state) => state.addToCart
-  );
+  const addItem = useCartStore((state) => state.addItem);
 
   const product = products.find(
-    (item) => item.slug === slug
+    (item) => item.slug === params.slug
   );
 
   if (!product) {
@@ -31,7 +25,6 @@ export default function ProductPage() {
 
   return (
     <>
-      <Header />
 
       <section className="py-20">
         <Container>
@@ -69,15 +62,7 @@ export default function ProductPage() {
               <div className="flex gap-4">
 
                 <Button
-                  onClick={() =>
-                    addToCart({
-                      id: product.id,
-                      name: product.name,
-                      price: product.price,
-                      image: product.image,
-                      quantity: 1,
-                    })
-                  }
+                  onClick={() => addItem(product)}
                 >
                   Add To Cart
                 </Button>

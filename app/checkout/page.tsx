@@ -1,12 +1,9 @@
-import Header from "../../components/layout/header";
-
 import CheckoutForm from "../../components/checkout/checkout-form";
 import OrderSummary from "../../components/checkout/order-summary";
 
 export default function CheckoutPage() {
   return (
     <>
-      <Header />
 
       <main className="min-h-screen bg-[#FEF4E4] py-20">
 

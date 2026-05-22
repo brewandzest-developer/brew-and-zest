@@ -1,153 +1,87 @@
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
+"use client";
 
-export interface CartItem {
+import { create } from "zustand";
+
+export type CartItem = {
   id: number;
   name: string;
   price: number;
   image: string;
-  quantity: number;
-}
+  quantity?: number;
+};
 
-export interface CartStore {
-  cart: CartItem[];
+export type CartStore = {
+  items: CartItem[];
 
-  addToCart: (
-    product: CartItem
-  ) => void;
+  isOpen: boolean;
 
-  removeFromCart: (
-    id: number
-  ) => void;
+  openCart: () => void;
 
-  increaseQuantity: (
-    id: number
-  ) => void;
+  closeCart: () => void;
 
-  decreaseQuantity: (
-    id: number
-  ) => void;
+  addItem: (item: CartItem) => void;
+
+  removeItem: (id: number) => void;
 
   clearCart: () => void;
-}
+};
 
-export const useCartStore =
-  create<CartStore>()(
-    persist(
-      (set) => ({
+export const useCartStore = create<CartStore>((set) => ({
+  items: [],
 
-        cart: [],
+  isOpen: false,
 
-        addToCart: (
-          product
-        ) =>
+  openCart: () =>
+    set(() => ({
+      isOpen: true,
+    })),
 
-          set((state) => {
+  closeCart: () =>
+    set(() => ({
+      isOpen: false,
+    })),
 
-            const existingProduct =
-              state.cart.find(
-                (item) =>
-                  item.id ===
-                  product.id
-              );
+  addItem: (item) =>
+    set((state) => {
+      const existingItem = state.items.find(
+        (i) => i.id === item.id
+      );
 
-            if (
-              existingProduct
-            ) {
-
-              return {
-                cart:
-                  state.cart.map(
-                    (item) =>
-
-                      item.id ===
-                      product.id
-                        ? {
-                            ...item,
-                            quantity:
-                              item.quantity +
-                              1,
-                          }
-                        : item
-                  ),
-              };
-
-            }
-
-            return {
-              cart: [
-                ...state.cart,
-                {
-                  ...product,
-                  quantity: 1,
-                },
-              ],
-            };
-
-          }),
-
-        removeFromCart:
-          (id) =>
-
-            set((state) => ({
-              cart:
-                state.cart.filter(
-                  (item) =>
-                    item.id !== id
-                ),
-            })),
-
-        increaseQuantity:
-          (id) =>
-
-            set((state) => ({
-              cart:
-                state.cart.map(
-                  (item) =>
-
-                    item.id === id
-                      ? {
-                          ...item,
-                          quantity:
-                            item.quantity +
-                            1,
-                        }
-                      : item
-                ),
-            })),
-
-        decreaseQuantity:
-          (id) =>
-
-            set((state) => ({
-              cart:
-                state.cart
-                  .map((item) =>
-
-                    item.id === id
-                      ? {
-                          ...item,
-                          quantity:
-                            item.quantity -
-                            1,
-                        }
-                      : item
-                  )
-                  .filter(
-                    (item) =>
-                      item.quantity > 0
-                  ),
-            })),
-
-        clearCart: () =>
-          set({
-            cart: [],
-          }),
-
-      }),
-
-      {
-        name: "cart-storage",
+      if (existingItem) {
+        return {
+          items: state.items.map((i) =>
+            i.id === item.id
+              ? {
+                  ...i,
+                  quantity: (i.quantity || 1) + 1,
+                }
+              : i
+          ),
+          isOpen: true,
+        };
       }
-    )
-  );
+
+      return {
+        items: [
+          ...state.items,
+          {
+            ...item,
+            quantity: 1,
+          },
+        ],
+        isOpen: true,
+      };
+    }),
+
+  removeItem: (id) =>
+    set((state) => ({
+      items: state.items.filter(
+        (item) => item.id !== id
+      ),
+    })),
+
+  clearCart: () =>
+    set(() => ({
+      items: [],
+    })),
+}));

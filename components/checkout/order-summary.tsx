@@ -1,398 +1,229 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-
 import Image from "next/image";
 
 import {
   CartItem,
-  CartStore,
   useCartStore,
 } from "@/store/cart-store";
 
-declare global {
-
-  interface Window {
-
-    Razorpay: new (
-      options: RazorpayOptions
-    ) => {
-      open: () => void;
-    };
-
-  }
-
-}
-
-interface RazorpayResponse {
-  razorpay_order_id: string;
-  razorpay_payment_id: string;
-  razorpay_signature: string;
-}
-
-interface RazorpayOptions {
-  key: string | undefined;
-  amount: number;
-  currency: string;
-  name: string;
-  description: string;
-  order_id: string;
-
-  handler: (
-    response: RazorpayResponse
-  ) => void;
-
-  prefill: {
-    name: string;
-    email: string;
-    contact: string;
-  };
-
-  theme: {
-    color: string;
-  };
-
-  modal: {
-    ondismiss: () => void;
-  };
-}
-
 export default function OrderSummary() {
+  const {
+    items,
+    clearCart,
+  } = useCartStore();
 
-  const router = useRouter();
-
-  const cart = useCartStore(
-    (state: CartStore) =>
-      state.cart
+  const subtotal = items.reduce(
+    (
+      acc: number,
+      item: CartItem
+    ) =>
+      acc +
+      item.price * (item.quantity || 1),
+    0
   );
 
-  const clearCart =
-    useCartStore(
-      (state: CartStore) =>
-        state.clearCart
-    );
+  const shipping = 0;
 
-  const [isLoading, setIsLoading] =
-    useState(false);
+  const total = subtotal + shipping;
 
-  const subtotal =
-    cart.reduce(
-      (
-        acc: number,
-        item: CartItem
-      ) =>
-        acc +
-        item.price *
-          item.quantity,
-      0
-    );
+  const handlePayment = async () => {
+    try {
+      const response = await fetch(
+        "/api/create-order",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            amount: total,
+          }),
+        }
+      );
 
-  const shipping =
-    subtotal > 0 ? 99 : 0;
+      const data = await response.json();
 
-  const total =
-    subtotal + shipping;
+      const options = {
+        key:
+          process.env
+            .NEXT_PUBLIC_RAZORPAY_KEY_ID,
 
-  const handlePayment =
-    async () => {
+        amount: data.amount,
 
-      try {
+        currency: data.currency,
 
-        setIsLoading(true);
+        name: "Brew & Zest",
 
-        const response =
-          await fetch(
-            "/api/create-order",
-            {
-              method: "POST",
+        description:
+          "Premium Coffee Purchase",
 
-              headers: {
-                "Content-Type":
-                  "application/json",
-              },
+        order_id: data.id,
 
-              body: JSON.stringify({
-                amount: total,
-              }),
-            }
-          );
-
-        const order =
-          await response.json();
-
-        const options: RazorpayOptions =
-          {
-
-            key:
-              process.env
-                .NEXT_PUBLIC_RAZORPAY_KEY_ID,
-
-            amount:
-              order.amount,
-
-            currency:
-              order.currency,
-
-            name:
-              "Brew & Zest",
-
-            description:
-              "Coffee Order Payment",
-
-            order_id:
-              order.id,
-
-            handler:
-              async function (
-                response: RazorpayResponse
-              ) {
-
-                try {
-
-                  const verifyResponse =
-                    await fetch(
-                      "/api/verify-payment",
-                      {
-                        method:
-                          "POST",
-
-                        headers:
-                          {
-                            "Content-Type":
-                              "application/json",
-                          },
-
-                        body:
-                          JSON.stringify(
-                            response
-                          ),
-                      }
-                    );
-
-                  const data =
-                    await verifyResponse.json();
-
-                  if (
-                    data.success
-                  ) {
-
-                    clearCart();
-
-                    localStorage.removeItem(
-                      "cart-storage"
-                    );
-
-                    router.push(
-                      "/payment-success"
-                    );
-
-                  } else {
-
-                    router.push(
-                      "/payment-failed"
-                    );
-
-                  }
-
-                } catch (
-                  error
-                ) {
-
-                  console.error(
-                    error
-                  );
-
-                  router.push(
-                    "/payment-failed"
-                  );
-
-                }
-
-              },
-
-            prefill: {
-
-              name:
-                "Brew & Zest",
-
-              email:
-                "hello@brewandzest.com",
-
-              contact:
-                "9460012223",
-
-            },
-
-            theme: {
-
-              color:
-                "#161414",
-
-            },
-
-            modal: {
-
-              ondismiss:
-                function () {
-
-                  router.push(
-                    "/payment-failed"
-                  );
-
+        handler: async (
+          response: {
+            razorpay_order_id: string;
+            razorpay_payment_id: string;
+            razorpay_signature: string;
+          }
+        ) => {
+          const verifyResponse =
+            await fetch(
+              "/api/verify-payment",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type":
+                    "application/json",
                 },
+                body: JSON.stringify(
+                  response
+                ),
+              }
+            );
 
-            },
+          const verifyData =
+            await verifyResponse.json();
 
+          if (verifyData.success) {
+            clearCart();
+
+            window.location.href =
+              "/payment-success";
+          } else {
+            window.location.href =
+              "/payment-failed";
+          }
+        },
+
+        theme: {
+          color: "#161414",
+        },
+      };
+
+      const razorpay = new (
+        window as typeof window & {
+          Razorpay: new (
+            options: Record<string, unknown>
+          ) => {
+            open: () => void;
           };
+        }
+      ).Razorpay(options);
 
-        const razorpay =
-          new window.Razorpay(
-            options
-          );
+      razorpay.open();
 
-        razorpay.open();
+    } catch (error) {
 
-      } catch (error) {
+      console.error(error);
 
-        console.error(error);
+      alert("Payment failed");
 
-        router.push(
-          "/payment-failed"
-        );
-
-      } finally {
-
-        setIsLoading(false);
-
-      }
-
-    };
+    }
+  };
 
   return (
+    <div className="rounded-4xl border border-black/10 bg-white p-8">
 
-    <aside className="sticky top-10 h-fit rounded-4xl border border-[#E6D7C8] bg-white p-8">
-
-      <h2 className="mb-8 text-3xl font-bold">
-
+      <h2 className="text-4xl font-bold">
         Order Summary
-
       </h2>
 
-      <div className="space-y-6">
+      {/* Items */}
+      <div className="mt-10 space-y-5">
 
-        {cart.map(
-          (
-            item: CartItem
-          ) => (
+        {items.map((item: CartItem) => (
 
-            <div
-              key={item.id}
-              className="flex gap-4"
-            >
+          <div
+            key={item.id}
+            className="flex items-center gap-4 rounded-3xl bg-[#f8f4ee] p-4"
+          >
 
-              <div className="relative h-20 w-20 overflow-hidden rounded-3xl bg-linear-to-br from-[#7B4E4C] to-[#161414]">
+            <div className="relative h-20 w-20 overflow-hidden rounded-2xl">
 
-                <Image
-                  src={item.image}
-                  alt={item.name}
-                  fill
-                  className="object-contain p-2"
-                />
-
-              </div>
-
-              <div className="flex flex-1 flex-col justify-center">
-
-                <h3 className="font-semibold">
-
-                  {item.name}
-
-                </h3>
-
-                <p className="mt-1 text-sm text-[#6B5E5B]">
-
-                  Qty:
-                  {" "}
-                  {item.quantity}
-
-                </p>
-
-              </div>
-
-              <div className="font-semibold">
-
-                ₹
-                {item.price *
-                  item.quantity}
-
-              </div>
+              <Image
+                src={item.image}
+                alt={item.name}
+                fill
+                className="object-cover"
+              />
 
             </div>
 
-          )
-        )}
+            <div className="flex-1">
+
+              <h3 className="text-lg font-semibold">
+                {item.name}
+              </h3>
+
+              <p className="mt-1 text-black/60">
+                Qty: {item.quantity || 1}
+              </p>
+
+            </div>
+
+            <p className="text-lg font-semibold">
+
+              ₹
+              {item.price *
+                (item.quantity || 1)}
+
+            </p>
+
+          </div>
+
+        ))}
 
       </div>
 
-      <div className="mt-10 space-y-4 border-t border-[#E6D7C8] pt-6">
+      {/* Pricing */}
+      <div className="mt-10 space-y-4 border-t border-black/10 pt-6">
 
-        <div className="flex items-center justify-between text-[#6B5E5B]">
+        <div className="flex items-center justify-between text-lg">
 
-          <span>
+          <p className="text-black/60">
             Subtotal
-          </span>
+          </p>
 
-          <span>
+          <p>
             ₹{subtotal}
-          </span>
+          </p>
 
         </div>
 
-        <div className="flex items-center justify-between text-[#6B5E5B]">
+        <div className="flex items-center justify-between text-lg">
 
-          <span>
+          <p className="text-black/60">
             Shipping
-          </span>
+          </p>
 
-          <span>
-            ₹{shipping}
-          </span>
+          <p>
+            Free
+          </p>
 
         </div>
 
-        <div className="flex items-center justify-between border-t border-[#E6D7C8] pt-4 text-xl font-semibold">
+        <div className="flex items-center justify-between border-t border-black/10 pt-4 text-2xl font-bold">
 
-          <span>
-            Total
-          </span>
+          <p>Total</p>
 
-          <span>
+          <p>
             ₹{total}
-          </span>
+          </p>
 
         </div>
 
       </div>
 
+      {/* Button */}
       <button
-        onClick={
-          handlePayment
-        }
-        disabled={
-          isLoading
-        }
-        className="mt-8 w-full rounded-full bg-[#161414] py-4 text-white transition hover:opacity-90 disabled:opacity-50"
+        onClick={handlePayment}
+        className="mt-10 w-full rounded-full bg-[#161414] py-5 text-lg text-white transition hover:opacity-90"
       >
-
-        {isLoading
-          ? "Processing..."
-          : "Continue To Payment"}
-
+        Continue To Payment
       </button>
 
-    </aside>
-
+    </div>
   );
-
 }

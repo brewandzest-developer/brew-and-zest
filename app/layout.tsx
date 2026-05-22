@@ -4,6 +4,8 @@ import "./globals.css";
 
 import { Poppins } from "next/font/google";
 
+import Header from "@/components/layout/header";
+import Footer from "@/components/layout/footer";
 import CartDrawer from "@/components/cart/cart-drawer";
 
 const poppins = Poppins({
@@ -24,13 +26,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${poppins.variable} antialiased`}>
+      <body
+        className={`${poppins.variable} bg-[#f6efe3] text-[#161414] antialiased`}
+      >
+        <Script src="https://checkout.razorpay.com/v1/checkout.js" />
 
-<CartDrawer />
-<Script src="https://checkout.razorpay.com/v1/checkout.js" />
-{children}
+        <Header />
 
-</body>
+        <CartDrawer />
+
+        <main>{children}</main>
+
+        <Footer />
+      </body>
     </html>
   );
 }
