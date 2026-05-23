@@ -9,21 +9,23 @@ interface Product {
   name: string;
   subtitle: string;
   category: string;
-  price: number;
   image: string;
+  price?: number;
+  sizes?: {
+    label: string;
+    price: number;
+  }[];
 }
 
 interface ProductCardProps {
   product: Product;
 }
 
-export default function ProductCard({
-  product,
-}: ProductCardProps) {
+export default function ProductCard({ product }: ProductCardProps) {
   return (
     <Link href={`/products/${product.slug}`}>
       <div className="group cursor-pointer">
-        <div className="relative h-85 overflow-hidden rounded-3xl bg-white">
+        <div className="relative h-85 overflow-hidden rounded-3xl bg-[radial-gradient(circle_at_top_left,#8B5A58,#3B2625_55%,#161414)]">
           <Image
             src={product.image}
             alt={product.name}
@@ -38,13 +40,11 @@ export default function ProductCard({
               {product.name}
             </h3>
 
-            <p className="mt-2 text-[#6E625C]">
-              {product.subtitle}
-            </p>
+            <p className="mt-2 text-[#6E625C]">{product.subtitle}</p>
           </div>
 
           <p className="text-xl font-semibold text-[#161414] whitespace-nowrap">
-            ₹{product.price}
+            ₹{product.sizes?.[0]?.price || product.price}
           </p>
         </div>
       </div>

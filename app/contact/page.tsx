@@ -1,205 +1,153 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { useState } from "react";
 
 export default function ContactPage() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const [successMessage, setSuccessMessage] =
-  useState("");
+  const [success, setSuccess] = useState(false);
 
-  const handleSubmit = async (
-    e: FormEvent<HTMLFormElement>
-  ) => {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    setIsLoading(true);
+    setLoading(true);
 
-    const form = e.currentTarget;
+    const formData = new FormData(e.currentTarget);
 
-    const formData = new FormData(form);
+    const response = await fetch("https://formspree.io/f/xldlrnva", {
+      method: "POST",
+      body: formData,
+      headers: {
+        Accept: "application/json",
+      },
+    });
 
-    const data = {
-      name: formData.get("name"),
-      email: formData.get("email"),
-      message: formData.get("message"),
-    };
+    setLoading(false);
 
-    try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
+    if (response.ok) {
+      setSuccess(true);
 
-      if (response.ok) {
-        setSuccessMessage(
-            "Message sent successfully. We'll get back to you shortly."
-          );
-          
-          form.reset();
-      } else {
-        setSuccessMessage(
-            "Something went wrong. Please try again."
-          );
-      }
-    } catch (error) {
-      console.error(error);
+      e.currentTarget.reset();
 
-      setSuccessMessage(
-        "Failed to send message. Please try again."
-      );
-    } finally {
-      setIsLoading(false);
+      setTimeout(() => {
+        setSuccess(false);
+      }, 4000);
     }
-  };
+  }
 
   return (
-    <main className="bg-[#f5ecdc] text-[#161414]">
+    <main className="min-h-screen bg-[#F5F0E6]">
+      {/* Hero */}
+      <section className="border-b border-black/10 px-6 py-20 md:px-16">
+        <p className="mb-5 uppercase tracking-[0.35em] text-[#8A6A5A]">
+          Contact Brew & Zest
+        </p>
 
-      {/* Hero Section */}
-      <section className="border-b border-black/10">
+        <h1 className="max-w-4xl text-6xl font-semibold leading-tight text-[#161414]">
+          Let’s Talk Coffee
+        </h1>
 
-        <div className="mx-auto max-w-360 px-6 py-28">
-
-          <p className="mb-6 text-sm uppercase tracking-[0.4em] text-[#7c5c52]">
-            Contact Brew & Zest
-          </p>
-
-          <h1 className="max-w-225 text-6xl font-bold leading-tight md:text-8xl">
-            Let&apos;s Talk
-            <br />
-            Coffee
-          </h1>
-
-          <p className="mt-10 max-w-175 text-xl leading-9 text-black/70">
-            Reach out for orders, collaborations, wholesale partnerships,
-            or coffee conversations.
-          </p>
-
-        </div>
-
+        <p className="mt-8 max-w-3xl text-xl leading-relaxed text-[#6E625C]">
+          Reach out for orders, collaborations, wholesale partnerships, or
+          coffee conversations.
+        </p>
       </section>
 
-      {/* Contact Layout */}
-      <section>
-
-        <div className="mx-auto grid max-w-360 gap-16 px-6 py-28 md:grid-cols-2">
-
-          {/* Left Side */}
+      {/* Contact Info */}
+      <section className="px-6 py-16 md:px-16">
+        <div className="grid gap-10 md:grid-cols-3">
           <div>
+            <p className="mb-3 uppercase tracking-[0.25em] text-[#8A6A5A]">
+              Email
+            </p>
 
-            <h2 className="text-4xl font-bold">
-              Get In Touch
-            </h2>
-
-            <div className="mt-12 space-y-8 text-lg">
-
-              <div>
-
-                <p className="text-sm uppercase tracking-[0.3em] text-[#7c5c52]">
-                  Email
-                </p>
-
-                <p className="mt-2">
-                  info@brewandzest.in
-                </p>
-
-              </div>
-
-              <div>
-
-                <p className="text-sm uppercase tracking-[0.3em] text-[#7c5c52]">
-                  Instagram
-                </p>
-
-                <p className="mt-2">
-                  @thebrewandzest
-                </p>
-
-              </div>
-
-              <div>
-
-                <p className="text-sm uppercase tracking-[0.3em] text-[#7c5c52]">
-                  Location
-                </p>
-
-                <p className="mt-2">
-                  India
-                </p>
-
-              </div>
-
-            </div>
-
-          </div>
-
-          {/* Contact Form */}
-          <div className="rounded-4xl border border-black/10 bg-white p-10">
-
-            <h3 className="text-5xl font-bold">
-              Send A Message
-            </h3>
-
-            <form
-              onSubmit={handleSubmit}
-              className="mt-10 space-y-6"
+            <a
+              href="mailto:info@brewandzest.in"
+              className="text-xl text-[#161414] transition hover:opacity-60"
             >
-
-              <input
-                type="text"
-                name="name"
-                placeholder="Full Name"
-                required
-                className="w-full rounded-full border border-black/10 bg-[#f8f4ee] px-6 py-5 text-lg outline-none transition focus:border-black"
-              />
-
-              <input
-                type="email"
-                name="email"
-                placeholder="Email Address"
-                required
-                className="w-full rounded-full border border-black/10 bg-[#f8f4ee] px-6 py-5 text-lg outline-none transition focus:border-black"
-              />
-
-              <textarea
-                name="message"
-                placeholder="Your Message"
-                rows={8}
-                required
-                className="w-full rounded-4xl border border-black/10 bg-[#f8f4ee] px-6 py-5 text-lg outline-none transition focus:border-black"
-              />
-
-                {successMessage && (
-
-                <div className="rounded-3xl border border-green-200 bg-green-50 px-5 py-4 text-sm text-green-700">
-
-                {successMessage}
-
-                </div>
-
-                )}
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full rounded-full bg-[#161414] py-5 text-lg text-white transition hover:opacity-90 disabled:opacity-50"
-              >
-                {isLoading
-                  ? "Sending..."
-                  : "Send Message"}
-              </button>
-
-            </form>
-
+              info@brewandzest.in
+            </a>
           </div>
 
-        </div>
+          <div>
+            <p className="mb-3 uppercase tracking-[0.25em] text-[#8A6A5A]">
+              Instagram
+            </p>
 
+            <a
+              href="https://instagram.com/thebrewandzest"
+              target="_blank"
+              className="text-xl text-[#161414] transition hover:opacity-60"
+            >
+              @thebrewandzest
+            </a>
+          </div>
+
+          <div>
+            <p className="mb-3 uppercase tracking-[0.25em] text-[#8A6A5A]">
+              Wholesale
+            </p>
+
+            <p className="text-xl text-[#161414]">Café & bulk partnerships</p>
+          </div>
+        </div>
       </section>
 
+      {/* Form */}
+      <section className="px-6 pb-24 md:px-16">
+        <div className="mx-auto max-w-5xl rounded-[40px] border border-black/10 bg-white p-8 md:p-14">
+          <h2 className="mb-10 text-5xl font-semibold text-[#161414]">
+            Send A Message
+          </h2>
+
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <input
+              type="text"
+              name="name"
+              required
+              placeholder="Full Name"
+              className="w-full rounded-full border border-[#DED3C5] bg-[#F8F4ED] px-8 py-5 text-xl outline-none transition focus:border-[#161414]"
+            />
+
+            <input
+              type="email"
+              name="email"
+              required
+              placeholder="Email Address"
+              className="w-full rounded-full border border-[#DED3C5] bg-[#F8F4ED] px-8 py-5 text-xl outline-none transition focus:border-[#161414]"
+            />
+
+            <textarea
+              name="message"
+              required
+              placeholder="Your Message"
+              rows={7}
+              className="w-full rounded-[30px] border border-[#DED3C5] bg-[#F8F4ED] px-8 py-6 text-xl outline-none transition focus:border-[#161414]"
+            />
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-full bg-[#161414] py-5 text-xl text-white transition hover:opacity-90 disabled:opacity-60"
+            >
+              {loading ? "Sending..." : "Send Message"}
+            </button>
+
+            {/* Success Message */}
+            {success && (
+              <div className="rounded-3xl border border-green-200 bg-green-50 px-6 py-5 text-center">
+                <p className="text-lg font-medium text-green-700">
+                  Message sent successfully.
+                </p>
+
+                <p className="mt-1 text-sm text-green-600">
+                  We’ll get back to you shortly.
+                </p>
+              </div>
+            )}
+          </form>
+        </div>
+      </section>
     </main>
   );
 }

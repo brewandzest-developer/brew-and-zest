@@ -4,10 +4,18 @@ import { create } from "zustand";
 
 export type CartItem = {
   id: number;
+
+  slug: string;
+
   name: string;
-  price: number;
+
   image: string;
+
+  price: number;
+
   quantity?: number;
+
+  selectedSize?: string;
 };
 
 export type CartStore = {
@@ -21,67 +29,136 @@ export type CartStore = {
 
   addItem: (item: CartItem) => void;
 
-  removeItem: (id: number) => void;
+  removeItem: (
+    id: number,
+    selectedSize?: string
+  ) => void;
+
+  increaseQuantity: (
+    id: number,
+    selectedSize?: string
+  ) => void;
+
+  decreaseQuantity: (
+    id: number,
+    selectedSize?: string
+  ) => void;
 
   clearCart: () => void;
 };
 
-export const useCartStore = create<CartStore>((set) => ({
-  items: [],
+export const useCartStore =
+  create<CartStore>((set) => ({
+    items: [],
 
-  isOpen: false,
+    isOpen: false,
 
-  openCart: () =>
-    set(() => ({
-      isOpen: true,
-    })),
+    openCart: () =>
+      set(() => ({
+        isOpen: true,
+      })),
 
-  closeCart: () =>
-    set(() => ({
-      isOpen: false,
-    })),
+    closeCart: () =>
+      set(() => ({
+        isOpen: false,
+      })),
 
-  addItem: (item) =>
-    set((state) => {
-      const existingItem = state.items.find(
-        (i) => i.id === item.id
-      );
+    addItem: (item) =>
+      set((state) => {
+        const existingItem =
+          state.items.find(
+            (i) =>
+              i.id === item.id &&
+              i.selectedSize ===
+                item.selectedSize
+          );
 
-      if (existingItem) {
+        if (existingItem) {
+          return {
+            items: state.items.map((i) =>
+              i.id === item.id &&
+              i.selectedSize ===
+                item.selectedSize
+                ? {
+                    ...i,
+                    quantity:
+                      (i.quantity || 1) + 1,
+                  }
+                : i
+            ),
+
+            isOpen: true,
+          };
+        }
+
         return {
-          items: state.items.map((i) =>
-            i.id === item.id
-              ? {
-                  ...i,
-                  quantity: (i.quantity || 1) + 1,
-                }
-              : i
-          ),
+          items: [
+            ...state.items,
+            {
+              ...item,
+              quantity: 1,
+            },
+          ],
+
           isOpen: true,
         };
-      }
+      }),
 
-      return {
-        items: [
-          ...state.items,
-          {
-            ...item,
-            quantity: 1,
-          },
-        ],
-        isOpen: true,
-      };
-    }),
+    removeItem: (id, selectedSize) =>
+      set((state) => ({
+        items: state.items.filter(
+          (item) =>
+            !(
+              item.id === id &&
+              item.selectedSize ===
+                selectedSize
+            )
+        ),
+      })),
 
-  removeItem: (id) =>
-    set((state) => ({
-      items: state.items.filter(
-        (item) => item.id !== id
-      ),
-    })),
+    increaseQuantity: (
+      id,
+      selectedSize
+    ) =>
+      set((state) => ({
+        items: state.items.map((item) =>
+          item.id === id &&
+          item.selectedSize ===
+            selectedSize
+            ? {
+                ...item,
+                quantity:
+                  (item.quantity || 1) + 1,
+              }
+            : item
+        ),
+      })),
 
-  clearCart: () =>
-    set(() => ({
-      items: [],
-    })),
-}));
+    decreaseQuantity: (
+      id,
+      selectedSize
+    ) =>
+      set((state) => ({
+        items: state.items
+          .map((item) =>
+            item.id === id &&
+            item.selectedSize ===
+              selectedSize
+              ? {
+                  ...item,
+                  quantity:
+                    (item.quantity || 1) - 1,
+                }
+              : item
+          )
+          .filter(
+            (item) =>
+              (item.quantity || 1) > 0
+          ),
+      })),
+
+    clearCart: () =>
+      set(() => ({
+        items: [],
+      })),
+  }));

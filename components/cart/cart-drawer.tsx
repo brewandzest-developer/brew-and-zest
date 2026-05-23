@@ -15,6 +15,8 @@ export default function CartDrawer() {
     isOpen,
     closeCart,
     removeItem,
+    increaseQuantity,
+    decreaseQuantity,
   } = useCartStore();
 
   const totalPrice = items.reduce(
@@ -73,7 +75,8 @@ export default function CartDrawer() {
                 </p>
 
                 <p className="mt-3 text-black/60">
-                  Add premium coffee to begin your journey.
+                  Add premium coffee to begin
+                  your journey.
                 </p>
 
               </div>
@@ -87,11 +90,12 @@ export default function CartDrawer() {
               {items.map((item: CartItem) => (
 
                 <div
-                  key={item.id}
+                  key={`${item.id}-${item.selectedSize}`}
                   className="flex gap-4 rounded-3xl border border-black/10 bg-white p-4"
                 >
 
-                  <div className="relative h-24 w-24 overflow-hidden rounded-2xl">
+                  {/* Image */}
+                  <div className="relative h-24 w-24 overflow-hidden rounded-2xl bg-[#F4F4F4]">
 
                     <Image
                       src={item.image}
@@ -102,6 +106,7 @@ export default function CartDrawer() {
 
                   </div>
 
+                  {/* Content */}
                   <div className="flex flex-1 flex-col justify-between">
 
                     <div>
@@ -110,15 +115,54 @@ export default function CartDrawer() {
                         {item.name}
                       </h3>
 
-                      <p className="mt-1 text-black/60">
-                        Qty: {item.quantity || 1}
-                      </p>
+                      {/* Size */}
+                      {item.selectedSize && (
+
+                        <p className="mt-1 text-xs uppercase tracking-[0.2em] text-[#8A6A5A]">
+                          {item.selectedSize}
+                        </p>
+
+                      )}
+
+                      {/* Quantity Controls */}
+                      <div className="mt-4 flex items-center gap-3">
+
+                        <button
+                          onClick={() =>
+                            decreaseQuantity(
+                              item.id,
+                              item.selectedSize
+                            )
+                          }
+                          className="flex h-9 w-9 items-center justify-center rounded-full border border-[#DED3C5] text-lg transition hover:bg-[#161414] hover:text-white"
+                        >
+                          -
+                        </button>
+
+                        <span className="min-w-6 text-center text-lg font-medium">
+                          {item.quantity || 1}
+                        </span>
+
+                        <button
+                          onClick={() =>
+                            increaseQuantity(
+                              item.id,
+                              item.selectedSize
+                            )
+                          }
+                          className="flex h-9 w-9 items-center justify-center rounded-full border border-[#DED3C5] text-lg transition hover:bg-[#161414] hover:text-white"
+                        >
+                          +
+                        </button>
+
+                      </div>
 
                     </div>
 
-                    <div className="flex items-center justify-between">
+                    {/* Price + Remove */}
+                    <div className="mt-5 flex items-center justify-between">
 
-                      <p className="text-lg font-semibold">
+                      <p className="text-2xl font-semibold">
                         ₹
                         {item.price *
                           (item.quantity || 1)}
@@ -126,7 +170,10 @@ export default function CartDrawer() {
 
                       <button
                         onClick={() =>
-                          removeItem(item.id)
+                          removeItem(
+                            item.id,
+                            item.selectedSize
+                          )
                         }
                         className="text-sm text-red-500 transition hover:opacity-60"
                       >

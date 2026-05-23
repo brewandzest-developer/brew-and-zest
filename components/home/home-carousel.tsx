@@ -3,10 +3,9 @@
 import Image from "next/image";
 
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Pagination } from "swiper/modules";
+import { Autoplay } from "swiper/modules";
 
 import "swiper/css";
-import "swiper/css/pagination";
 
 const slides = [
   {
@@ -24,33 +23,24 @@ const slides = [
   {
     image: "/images/car-3.jpg",
     title: "Fruit Based Aged Collection",
-    subtitle:
-      "Tropical profiles layered with vibrant specialty coffee notes.",
+    subtitle: "Tropical profiles layered with vibrant specialty coffee notes.",
   },
 ];
 
 export default function HomeCarousel() {
   return (
-    <section className="relative">
-
+    <section className="relative overflow-hidden">
       <Swiper
-        modules={[Autoplay, Pagination]}
+        modules={[Autoplay]}
         autoplay={{
           delay: 4000,
         }}
-        pagination={{
-          clickable: true,
-        }}
         loop
-        className="h-[90vh]"
+        className="h-[65vh]"
       >
-
         {slides.map((slide) => (
-
           <SwiperSlide key={slide.title}>
-
-            <div className="relative h-[90vh] w-full overflow-hidden">
-
+            <div className="relative h-[65vh] w-full overflow-hidden">
               {/* Background Image */}
               <Image
                 src={slide.image}
@@ -60,17 +50,12 @@ export default function HomeCarousel() {
                 className="object-cover"
               />
 
-              {/* Overlay */}
-              <div className="absolute inset-0 bg-black/40" />
-
+              {/* Dark Overlay */}
+              <div className="absolute inset-0 bg-black/30" />
             </div>
-
           </SwiperSlide>
-
         ))}
-
       </Swiper>
-
     </section>
   );
 }

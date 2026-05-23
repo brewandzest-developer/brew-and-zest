@@ -2,76 +2,63 @@
 
 import Link from "next/link";
 
-const navLinks = [
-  {
-    label: "Home",
-    href: "/",
-  },
-  {
-    label: "Shop",
-    href: "/shop",
-  },
-  {
-    label: "About",
-    href: "/about",
-  },
-  {
-    label: "Contact",
-    href: "/contact",
-  },
-];
+import { useCartStore } from "@/store/cart-store";
 
 export default function Header() {
+  const openCart = useCartStore((state) => state.openCart);
+
   return (
-    <header className="border-b border-black/10 bg-[#F5EBDD]">
-
-      <div className="mx-auto flex max-w-360 items-center justify-between px-10 py-8">
-
+    <header className="sticky top-0 z-50 border-b border-black/5 bg-[#F6F0E4]/95 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-400 items-center justify-between px-6 py-6 md:px-12">
         {/* Logo */}
         <Link
           href="/"
-          className="text-5xl font-bold tracking-tight"
+          className="text-4xl font-semibold tracking-tight text-[#161414]"
         >
           Brew & Zest
         </Link>
 
         {/* Navigation */}
-        <nav className="flex items-center gap-10 text-lg">
+        <nav className="hidden items-center gap-14 md:flex">
+          <Link
+            href="/"
+            className="text-lg text-[#161414] transition hover:opacity-60"
+          >
+            Home
+          </Link>
 
-          {navLinks.map(
-            (
-              link: {
-                label: string;
-                href: string;
-              }
-            ) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="transition hover:opacity-60"
-              >
-                {link.label}
-              </Link>
-            )
-          )}
+          <Link
+            href="/shop"
+            className="text-lg text-[#161414] transition hover:opacity-60"
+          >
+            Shop
+          </Link>
 
+          <Link
+            href="/about"
+            className="text-lg text-[#161414] transition hover:opacity-60"
+          >
+            About
+          </Link>
+
+          <Link
+            href="/contact"
+            className="text-lg text-[#161414] transition hover:opacity-60"
+          >
+            Contact
+          </Link>
         </nav>
 
-        {/* Right Side */}
-        <div className="flex items-center gap-8 text-lg">
+        {/* Cart */}
+        <button
+          onClick={openCart}
+          className="group relative flex items-center gap-3 rounded-full border border-[#161414]/15 bg-white/70 px-5 py-2.5 text-sm font-medium tracking-wide text-[#161414] shadow-sm backdrop-blur-md transition-all duration-300 hover:-translate-y-px hover:border-[#161414]/30 hover:bg-white hover:shadow-lg"
+        >
+          <span className="h-2 w-2 rounded-full bg-[#8A6A5A] transition-all duration-300 group-hover:scale-125" />
 
-          <button className="transition hover:opacity-60">
-            Search
-          </button>
-
-          <button className="transition hover:opacity-60">
-            Cart
-          </button>
-
-        </div>
-
+          <span className="uppercase tracking-[0.18em]">Cart</span>
+        </button>
       </div>
-
     </header>
   );
 }
