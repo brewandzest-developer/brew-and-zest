@@ -2,6 +2,8 @@
 
 import { create } from "zustand";
 
+import { persist } from "zustand/middleware";
+
 export type CartItem = {
   id: number;
 
@@ -48,117 +50,153 @@ export type CartStore = {
 };
 
 export const useCartStore =
-  create<CartStore>((set) => ({
-    items: [],
+  create<CartStore>()(
+    persist(
+      (set) => ({
 
-    isOpen: false,
+        items: [],
 
-    openCart: () =>
-      set(() => ({
-        isOpen: true,
-      })),
-
-    closeCart: () =>
-      set(() => ({
         isOpen: false,
-      })),
 
-    addItem: (item) =>
-      set((state) => {
-        const existingItem =
-          state.items.find(
-            (i) =>
-              i.id === item.id &&
-              i.selectedSize ===
-                item.selectedSize
-          );
-
-        if (existingItem) {
-          return {
-            items: state.items.map((i) =>
-              i.id === item.id &&
-              i.selectedSize ===
-                item.selectedSize
-                ? {
-                    ...i,
-                    quantity:
-                      (i.quantity || 1) + 1,
-                  }
-                : i
-            ),
-
+        openCart: () =>
+          set(() => ({
             isOpen: true,
-          };
-        }
+          })),
 
-        return {
-          items: [
-            ...state.items,
-            {
-              ...item,
-              quantity: 1,
-            },
-          ],
+        closeCart: () =>
+          set(() => ({
+            isOpen: false,
+          })),
 
-          isOpen: true,
-        };
+        addItem: (item) =>
+          set((state) => {
+
+            const existingItem =
+              state.items.find(
+                (i) =>
+                  i.id === item.id &&
+                  i.selectedSize ===
+                    item.selectedSize
+              );
+
+            if (existingItem) {
+
+              return {
+                items: state.items.map(
+                  (i) =>
+                    i.id === item.id &&
+                    i.selectedSize ===
+                      item.selectedSize
+                      ? {
+                          ...i,
+                          quantity:
+                            (i.quantity ||
+                              1) + 1,
+                        }
+                      : i
+                ),
+
+                isOpen: true,
+              };
+
+            }
+
+            return {
+
+              items: [
+                ...state.items,
+
+                {
+                  ...item,
+                  quantity: 1,
+                },
+              ],
+
+              isOpen: true,
+            };
+
+          }),
+
+        removeItem: (
+          id,
+          selectedSize
+        ) =>
+          set((state) => ({
+            items:
+              state.items.filter(
+                (item) =>
+                  !(
+                    item.id === id &&
+                    item.selectedSize ===
+                      selectedSize
+                  )
+              ),
+          })),
+
+        increaseQuantity: (
+          id,
+          selectedSize
+        ) =>
+          set((state) => ({
+            items: state.items.map(
+              (item) =>
+                item.id === id &&
+                item.selectedSize ===
+                  selectedSize
+                  ? {
+                      ...item,
+                      quantity:
+                        (item.quantity ||
+                          1) + 1,
+                    }
+                  : item
+            ),
+          })),
+
+        decreaseQuantity: (
+          id,
+          selectedSize
+        ) =>
+          set((state) => ({
+            items:
+              state.items
+                .map((item) => {
+
+                  if (
+                    item.id === id &&
+                    item.selectedSize ===
+                      selectedSize
+                  ) {
+
+                    return {
+                      ...item,
+
+                      quantity:
+                        (item.quantity ||
+                          1) - 1,
+                    };
+
+                  }
+
+                  return item;
+
+                })
+                .filter(
+                  (item) =>
+                    (item.quantity || 1) >
+                    0
+                ),
+          })),
+
+        clearCart: () =>
+          set(() => ({
+            items: [],
+          })),
+
       }),
 
-    removeItem: (id, selectedSize) =>
-      set((state) => ({
-        items: state.items.filter(
-          (item) =>
-            !(
-              item.id === id &&
-              item.selectedSize ===
-                selectedSize
-            )
-        ),
-      })),
-
-    increaseQuantity: (
-      id,
-      selectedSize
-    ) =>
-      set((state) => ({
-        items: state.items.map((item) =>
-          item.id === id &&
-          item.selectedSize ===
-            selectedSize
-            ? {
-                ...item,
-                quantity:
-                  (item.quantity || 1) + 1,
-              }
-            : item
-        ),
-      })),
-
-    decreaseQuantity: (
-      id,
-      selectedSize
-    ) =>
-      set((state) => ({
-        items: state.items
-          .map((item) =>
-            item.id === id &&
-            item.selectedSize ===
-              selectedSize
-              ? {
-                  ...item,
-                  quantity:
-                    (item.quantity || 1) - 1,
-                }
-              : item
-          )
-          .filter(
-            (item) =>
-              (item.quantity || 1) > 0
-          ),
-      })),
-
-    clearCart: () =>
-      set(() => ({
-        items: [],
-      })),
-  }));
+      {
+        name: "brew-and-zest-cart",
+      }
+    )
+  );
